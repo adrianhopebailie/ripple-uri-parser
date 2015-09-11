@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ripple URI Schema Tester</title>
+    <script type="application/javascript" src="lib/uri-js/uri.min.js"></script>
+    <script type="application/javascript" src="lib/uri-js/schemes/mailto.min.js"></script>
+    <script type="application/javascript" src="lib/uri-js/schemes/urn.min.js"></script>
+    <script type="application/javascript" src="js/schemes/ripple.js"></script>
+    <script type="application/javascript">
+        function syntaxHighlight(json) {
+            if (typeof json != 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'key';
+                    } else {
+                        cls = 'string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        function parseURI(uri)
+        {
+            document.getElementById("output").innerHTML = syntaxHighlight(URI.parse(uri));
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+    <style type="text/css">
+        .key {
+            font-weight: bold;
+        }
+        .string {
+            color: darkred;
+        }
+        .number {
+            color: darkblue;
+        }
+    </style></head>
+<body>
+<div class="container">
+        <h1>Ripple URI Schema Parser</h1>
+
+        <div>
+            <label>URI:<input id="input" type="text" size="100"></label>
+            <button id="test_button" onclick="parseURI(document.getElementById('input').value)">Test</button>
+        </div>
+        <div>
+            <p>Some examples:</p>
+            <pre>ripple://39921@rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn?invoice_id=718C6D58DD3BBAAAEBFE48B8FBE3C32C9F6F2EBC395233BA95D0057078EE07DB&amount=703.21
+ripple://39921@rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn
+ripple://rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn/USD/ra5nK24KXen9AHvsdFTKHSANinZseWnPcX
+ripple://rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn/USD
+ripple:transaction:E72F05DB3152D5054ED01E674F61E68978738F910AFEF6C3A8C34ECF9E7BABD1
+ripple:transaction:blob:1200002280000000240000015061D54728B6E948DD0000000000000000000000000055534400000000004B4E9C06F24296074F7BC48F92A97916C6DC5EA9684000000000002710732103AB40A0490F9B7ED8DF29D246BF2D6269820A0EE7742ACDD457BEA7C7D0931EDB74473045022100ECF89E2D356CD0349D24B43A852F440BD526AF64E3564F7F98DBED9E828860AF02204C329B7B36215B70A745671069EE49CBC5544A33C9CB49B42D9EDB670616991381144B4E9C06F24296074F7BC48F92A97916C6DC5EA983143E9D4A2B8AA0780F682D136F7A56D6724EF53754</pre>
+        </div>
+        <div>
+    <pre id="output">Type a URI above and click test.</pre>
+        </div>
+</div><!-- /.container -->
+</body>
+</html>
