@@ -1,7 +1,8 @@
 
 if (typeof COMPILED === "undefined" && typeof URI === "undefined" && typeof require === "function")
 {
-    var URI = require("../uri");
+    var URI = require("uri-js");
+    var SerializedObject = require('ripple-lib').SerializedObject;
 }
 (function () {
 
@@ -31,15 +32,20 @@ if (typeof COMPILED === "undefined" && typeof URI === "undefined" && typeof requ
                     if(sub_elements[1] == "blob" && sub_elements.length >= 3)
                     {
                         components.signed_transaction = sub_elements[2];
+                        if(typeof SerializedObject === "function")
+                        {
+                            var buffer = new SerializedObject(sub_elements[2]);
+//                        components.transaction = JSON.parse(buffer.to_json());
+                        components.transaction = buffer.to_json();
+                        }
+                        else
+                        {
+                            console.log("Couldn't ")
+                        }
                     }
                     else
                     {
                         components.transaction_hash = sub_elements[1];
-                        //TODO Consider parsing the blob when have access to our SerializedObject class
-                        // - https://github.com/ripple/ripple-lib/blob/develop/src/core/serializedobject.js
-                        //
-                        //var buffer = new SerializedObject(sub_elements[1]);
-                        //components.transaction = JSON.parse(buffer.to_json())
                     }
                 }
             }

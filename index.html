@@ -4,14 +4,21 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ripple URI Schema Tester</title>
+    <title>Ripple URI Scheme Tester</title>
     <script type="application/javascript" src="lib/uri-js/uri.min.js"></script>
     <script type="application/javascript" src="lib/uri-js/schemes/mailto.min.js"></script>
     <script type="application/javascript" src="lib/uri-js/schemes/urn.min.js"></script>
-    <script type="application/javascript" src="js/schemes/ripple.js"></script>
+    <script type="application/javascript" src="bower_components/ripple/ripple.js"></script>
+    <script type="application/javascript" src="ripple-uri-parser.js"></script>
     <script type="application/javascript">
+
+        var SerializedObject = ripple.SerializedObject;
+
         function syntaxHighlight(json) {
-            if (typeof json != 'string') {
+            if (typeof json == 'string') {
+                json = JSON.stringify(JSON.parse(json), undefined, 2);
+            }
+            else {
                 json = JSON.stringify(json, undefined, 2);
             }
             json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -34,8 +41,28 @@
 
         function parseURI(uri)
         {
-            document.getElementById("output").innerHTML = syntaxHighlight(URI.parse(uri));
+            if(document.querySelector('input[name=service]:checked').value == "browser") {
+                document.getElementById("output").innerHTML = syntaxHighlight(URI.parse(uri));
+            }
+            else
+            {
+                var request = new XMLHttpRequest();
+                request.addEventListener("load", requestLoadListener);
+                request.addEventListener("error", requestErrorListener);
+                request.open("GET", "http://localhost:8888?uri=" + encodeURIComponent(uri), true);
+                request.send();
+            }
         }
+
+        function requestLoadListener () {
+            document.getElementById("output").innerHTML = syntaxHighlight(this.responseText);
+        }
+
+        function requestErrorListener () {
+            document.getElementById("output").innerHTML = "Error fetching JSON from http://localhost:8888." +
+                    " Ensure the server is running by executing 'node server.js'.";
+        }
+
     </script>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
     <style type="text/css">
@@ -51,11 +78,19 @@
     </style></head>
 <body>
 <div class="container">
-        <h1>Ripple URI Schema Parser</h1>
+        <h1>Ripple URI Scheme Parser</h1>
 
         <div>
             <label>URI:<input id="input" type="text" size="100"></label>
-            <button id="test_button" onclick="parseURI(document.getElementById('input').value)">Test</button>
+            <button id="test_button" onclick="parseURI(document.getElementById('input').value)">Test</button><br/>
+            <label>
+                <input type="radio" name="service" value="browser" checked>
+                in browser
+            </label><br>
+            <label>
+                <input type="radio" name="service" value="remote">
+                using nodejs lib (ensure server.js is running)
+            </label>
         </div>
         <div>
             <p>Some examples:</p>
@@ -69,6 +104,6 @@ ripple:transaction:blob:1200002280000000240000015061D54728B6E948DD00000000000000
         <div>
     <pre id="output">Type a URI above and click test.</pre>
         </div>
-</div><!-- /.container -->
+</div>
 </body>
 </html>
